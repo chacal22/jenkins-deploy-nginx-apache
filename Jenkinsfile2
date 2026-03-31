@@ -1,5 +1,8 @@
   pipeline {
       agent any
+      options {
+        ParallelAlwaysFailFast()
+      }
 
       environment {
           JENKINS_WEB_ROOT = '/opt/app-web'
@@ -16,7 +19,6 @@
         }
 
         stage('Drop the containers'){   
-            failFast true
             parallel{
               stage('Drop apache container'){
                 steps {
