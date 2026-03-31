@@ -7,57 +7,57 @@
       }
 
       stages {
-          stage('Create directory for the WEB Application') {
-              steps {
-                  // First, ensure the mounted directory exists and clean only its contents
-                  sh 'mkdir -p ${JENKINS_WEB_ROOT}'
-                  sh 'find ${JENKINS_WEB_ROOT} -mindepth 1 -maxdepth 1 -exec rm -rf {} +'
-              }
+        stage('Create directory for the WEB Application') {
+          steps {
+            // First, ensure the mounted directory exists and clean only its contents
+            sh 'mkdir -p ${JENKINS_WEB_ROOT}'
+            sh 'find ${JENKINS_WEB_ROOT} -mindepth 1 -maxdepth 1 -exec rm -rf {} +'
           }
+        }
 
         stage('Drop the containers'){   
             failFast true
             parallel{
-                stage('Drop apache container'){
-                    steps {
-                        echo 'droping the Apache container...'
-                        sh 'ocker rm -f app-web-apache'
-                    }
+              stage('Drop apache container'){
+                steps {
+                  echo 'droping the Apache container...'
+                  sh 'ocker rm -f app-web-apache'
+                }
                 }
                 stage('Drop Nginx Container'){
-                    steps{
-                        echo 'droping the Nginx container...'
-                        sh 'docker rm -f app-web-nginx'
-                    }
+                  steps{
+                    echo 'droping the Nginx container...'
+                    sh 'docker rm -f app-web-nginx'
+                  }
                 }           
             }
         }
 
-          stage('Copy the web application to the container directory') {
-              steps {
-                  echo 'Copying web application...'
-                  sh 'test -d web'
-                  sh 'cp -a web/. ${JENKINS_WEB_ROOT}/'
-                  sh 'ls -la ${JENKINS_WEB_ROOT}'
-              }
+        stage('Copy the web application to the container directory') {
+          steps {
+            echo 'Copying web application...'
+            sh 'test -d web'
+            sh 'cp -a web/. ${JENKINS_WEB_ROOT}/'
+            sh 'ls -la ${JENKINS_WEB_ROOT}'
           }
+        }
 
-          stage('Create the containers in Parallel') {
-              parallel {
-                  stage('Create the Apache container') {
-                      steps {
-                          echo 'Creating the Apache Container...'
-                          sh 'docker run -dit --name app-web-apache -p 9100:80 -v ${HOST_WEB_ROOT}:/usr/local/apache2/htdocs/ httpd'
-                      }
-                  }
-                  stage('Create the Nginx container') {
-                      steps {
-                          echo 'Creating the Nginx container...'
-                          sh 'docker run -dit --name app-web-nginx -p 9200:80 -v ${HOST_WEB_ROOT}:/usr/share/nginx/html nginx'
-                      }
-                  }
+        stage('Create the containers in Parallel') {
+          parallel {
+            stage('Create the Apache container') {
+              steps {
+                echo 'Creating the Apache Container...'
+                sh 'docker run -dit --name app-web-apache -p 9100:80 -v ${HOST_WEB_ROOT}:/usr/local/apache2/htdocs/ httpd'
               }
+            }
+            stage('Create the Nginx container') {
+              steps {
+                echo 'Creating the Nginx container...'
+                sh 'docker run -dit --name app-web-nginx -p 9200:80 -v ${HOST_WEB_ROOT}:/usr/share/nginx/html nginx'
+              }
+            }
           }
+        }
       }
 
       post {
