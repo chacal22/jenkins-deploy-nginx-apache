@@ -16,6 +16,7 @@
           }
 
         stage('Drop the containers'){   
+            failFast true
             parallel{
                 stage('Drop apache container'){
                     steps {
@@ -42,7 +43,6 @@
           }
 
           stage('Create the containers in Parallel') {
-              failFast: true
               parallel {
                   stage('Create the Apache container') {
                       steps {
